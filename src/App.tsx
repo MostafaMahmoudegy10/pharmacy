@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AppHeader } from './components/layout/AppHeader';
 import { initialNotice, seedMedicines, seedOrders, seedPrescriptions } from './data/pharmacyData';
 import { AuthScreen } from './features/auth/AuthScreen';
@@ -31,9 +31,9 @@ import { medicineName, scoreMedicine } from './utils/pharmacy';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppShell />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
