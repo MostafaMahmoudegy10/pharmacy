@@ -6,7 +6,8 @@ export function MetricCard({ label, value, detail, icon: Icon }: Metric) {
     <motion.article
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border border-[#d7e8e2] bg-white p-4 shadow-sm"
+      whileHover={{ y: -4 }}
+      className="metric-card border border-[#d7e8e2] bg-white p-4 shadow-sm"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">

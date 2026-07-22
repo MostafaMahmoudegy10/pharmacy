@@ -73,21 +73,19 @@ export function PrescriptionUploadPanel({
   };
 
   return (
-    <article id="prescription" className="rounded-lg border border-[#d7e8e2] bg-white shadow-sm">
-      <div className="grid gap-4 p-5 md:grid-cols-[170px_1fr]">
-        <img
-          src="/rxflow-prescription-upload.png"
-          alt=""
-          className="h-full min-h-44 w-full rounded-lg object-cover"
-        />
-        <div>
+    <article id="prescription" className="rx-upload-card">
+      <div className="rx-upload-visual">
+        <img src="/rxflow-prescription-upload.png" alt="" />
+        <div><UploadCloud size={28}/><b>{locale === 'ar' ? 'صورة واضحة = مراجعة أسرع' : 'A clear image means a faster review'}</b><small>{locale === 'ar' ? 'PNG, JPG أو PDF' : 'PNG, JPG or PDF'}</small></div>
+      </div>
+      <div className="p-6 md:p-8">
           <SectionHeading
             eyebrow={text.eyebrow}
             title={text.title}
             description={text.description}
             compact
           />
-          <form onSubmit={submit} className="mt-4 grid gap-3">
+          <form onSubmit={submit} className="mt-6 grid gap-4">
             <div className="grid gap-3 sm:grid-cols-3">
               <InputField
                 label={text.customer}
@@ -115,11 +113,11 @@ export function PrescriptionUploadPanel({
                 onChange={(event) => setForm({ ...form, notes: event.target.value })}
                 rows={3}
                 placeholder={text.notesPlaceholder}
-                className="rounded-md border border-[#d7e8e2] p-3 text-sm font-semibold leading-7 text-[#173d36] outline-none transition placeholder:text-[#8aa098] focus:border-[#0f7f6d]"
+                className="min-h-28 rounded-xl border border-[#d7e8e2] bg-[#fbfdfc] p-4 text-sm font-semibold leading-7 text-[#173d36] outline-none transition placeholder:text-[#8aa098] focus:border-[#0f7f6d] focus:bg-white focus:ring-4 focus:ring-[#0f7f6d]/5"
               />
             </label>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <label className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-[#0f7f6d] bg-[#edf7f3] px-4 text-sm font-black text-[#0f7f6d]">
+              <label className="upload-dropzone">
                 <UploadCloud size={18} />
                 {form.fileName || text.upload}
                 <input
@@ -131,14 +129,13 @@ export function PrescriptionUploadPanel({
               </label>
               <button
                 type="submit"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#0f7f6d] px-5 text-sm font-black text-white transition hover:bg-[#0a5f52]"
+                className="primary-btn min-h-14 px-7"
               >
                 <ArrowRight size={18} />
                 {text.submit}
               </button>
             </div>
           </form>
-        </div>
       </div>
     </article>
   );

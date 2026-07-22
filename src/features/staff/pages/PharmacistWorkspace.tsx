@@ -188,7 +188,7 @@ export function PharmacistWorkspace({
   const showInventory = page === 'inventory';
 
   return (
-    <div id="staff-home" className="mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:px-8">
+    <div id="staff-home" className="staff-workspace pharmacist-workspace mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:px-8">
       <WorkspaceHero
         role="pharmacist"
         locale={locale}

@@ -28,7 +28,7 @@ export function InputField({
         placeholder={placeholder}
         type={type}
         required={required}
-        className="min-h-11 rounded-md border border-[#d7e8e2] bg-white px-3 text-sm font-bold text-[#173d36] outline-none transition placeholder:text-[#8aa098] focus:border-[#0f7f6d]"
+        className="min-h-13 rounded-xl border border-[#d7e8e2] bg-[#fbfdfc] px-4 text-sm font-bold text-[#173d36] outline-none transition placeholder:text-[#96a7a2] focus:border-[#0f7f6d] focus:bg-white focus:ring-4 focus:ring-[#0f7f6d]/5"
       />
     </label>
   );

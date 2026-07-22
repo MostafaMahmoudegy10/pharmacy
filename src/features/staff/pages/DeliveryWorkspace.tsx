@@ -99,7 +99,7 @@ export function DeliveryWorkspace({
   const showCollection = page === 'collection';
 
   return (
-    <div id="delivery-home" className="mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:px-8">
+    <div id="delivery-home" className="staff-workspace delivery-workspace mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:px-8">
       <WorkspaceHero role="delivery" locale={locale} title={text.title} description={text.description} />
 
       {(showOverview || showCollection) && <div id="collection" className="grid gap-4 md:grid-cols-4">

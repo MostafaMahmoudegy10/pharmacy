@@ -20,7 +20,7 @@ export function WorkspaceHero({
   const Icon = config.icon;
 
   return (
-    <section className="workspace-hero rounded-lg border border-[#d7e8e2] bg-white p-5 shadow-sm">
+    <section className={`workspace-hero workspace-hero-${role} border border-[#d7e8e2] bg-white p-5 shadow-sm`}>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center gap-2">

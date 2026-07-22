@@ -1,5 +1,5 @@
-import { LogOut, Pill } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { LogIn, LogOut, Pill, ShoppingBag } from 'lucide-react';
+import { Link, NavLink } from 'react-router-dom';
 import { roleConfig } from '../../data/pharmacyData';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { RoleBadge } from '../ui/RoleBadge';
@@ -11,12 +11,14 @@ const headerCopy = {
     subtitle: 'صيدليتك أونلاين',
     signOut: 'خروج',
     account: 'الحساب',
+    login: 'دخول / حساب جديد',
   },
   en: {
     product: 'RxMasr',
     subtitle: 'Your online pharmacy',
     signOut: 'Sign out',
     account: 'Account',
+    login: 'Sign in / Register',
   },
 };
 
@@ -98,7 +100,7 @@ export function AppHeader({
   role: Role;
   locale: Locale;
   notice: LocalizedText;
-  session: Session;
+  session: Session | null;
   onLocaleChange: (locale: Locale) => void;
   onSignOut: () => void;
 }) {
@@ -144,7 +146,7 @@ export function AppHeader({
           <div className="hidden lg:block">
             <LanguageToggle locale={locale} onChange={onLocaleChange} />
           </div>
-          <div
+          {session ? <div
             className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/80 bg-white px-2.5 shadow-sm"
             title={notice[locale]}
           >
@@ -153,8 +155,8 @@ export function AppHeader({
               <p className="text-xs font-black text-[#173d36]">{session.name}</p>
             </div>
             <RoleBadge role={activeRole.id} locale={locale} />
-          </div>
-          <button
+          </div> : <Link to="/auth" className="primary-btn min-h-10 px-4"><LogIn size={17}/>{copy.login}</Link>}
+          {session ? <button
             type="button"
             onClick={onSignOut}
             className="grid size-10 place-items-center rounded-full border border-white/80 bg-white text-[#48645d] shadow-sm transition hover:text-[#0f7f6d]"
@@ -162,7 +164,7 @@ export function AppHeader({
             title={copy.signOut}
           >
             <LogOut size={18} />
-          </button>
+          </button> : <Link to="/customer/products" className="grid size-10 place-items-center rounded-full border border-[#dceae5] bg-white text-[#0f7f6d]" aria-label="shop"><ShoppingBag size={18}/></Link>}
         </div>
       </div>
     </header>

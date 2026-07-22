@@ -127,6 +127,10 @@ function AppShell() {
 
   const createOrderFromCart = () => {
     if (!cartItems.length) return;
+    if (!session) {
+      navigate('/auth');
+      return;
+    }
     const nextId = `ORD-${1191 + orders.length}`;
     const newOrder: DeliveryOrder = {
       id: nextId,
@@ -161,6 +165,10 @@ function AppShell() {
     notes: string;
     fileName: string;
   }) => {
+    if (!session) {
+      navigate('/auth');
+      return;
+    }
     const nextId = `RX-${2051 + prescriptions.length}`;
     const uploaded: Prescription = {
       id: nextId,
@@ -261,31 +269,14 @@ function AppShell() {
     setOrders((current) => current.map((order) => order.id === id ? { ...order, ...updates } : order));
   };
 
-  if (!session) {
-    return (
-      <Routes>
-        <Route
-          path="/auth"
-          element={(
-            <AuthScreen
-              locale={locale}
-              onLocaleChange={setLocale}
-              onAuthenticated={handleAuthenticated}
-            />
-          )}
-        />
-        <Route path="*" element={<Navigate to="/auth" replace />} />
-      </Routes>
-    );
-  }
-
   const guard = (requiredRole: Role, element: ReactNode) => {
-    return role === requiredRole ? element : <Navigate to={defaultPath(role)} replace />;
+    if (requiredRole === 'customer') return element;
+    return session && role === requiredRole ? element : <Navigate to="/auth" replace />;
   };
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#f5fbf8] text-[#10231f]">
-      <AppHeader
+      {location.pathname !== '/auth' && <AppHeader
         role={role}
         locale={locale}
         notice={notice}
@@ -293,10 +284,11 @@ function AppShell() {
         onLocaleChange={setLocale}
         onSignOut={() => {
           setSession(null);
+          setRole('customer');
           setNotice(initialNotice);
-          navigate('/auth', { replace: true });
+          navigate('/customer', { replace: true });
         }}
-      />
+      />}
 
       <AnimatePresence mode="wait">
         <motion.section
@@ -307,8 +299,8 @@ function AppShell() {
           transition={{ duration: 0.32, ease: 'easeOut' }}
         >
           <Routes location={location}>
-            <Route path="/" element={<Navigate to={defaultPath(role)} replace />} />
-            <Route path="/auth" element={<Navigate to={defaultPath(role)} replace />} />
+            <Route path="/" element={<Navigate to="/customer" replace />} />
+            <Route path="/auth" element={session ? <Navigate to={defaultPath(role)} replace /> : <AuthScreen locale={locale} onLocaleChange={setLocale} onAuthenticated={handleAuthenticated} />} />
 
             <Route
               path="/customer"
@@ -359,7 +351,7 @@ function AppShell() {
             />
             <Route
               path="/customer/refills"
-              element={guard('customer', (
+              element={session ? guard('customer', (
                 <CustomerRefillsPage
                   locale={locale}
                   medicines={medicines}
@@ -370,11 +362,11 @@ function AppShell() {
                   subscriptionActive={subscriptionActive}
                   setSubscriptionActive={setSubscriptionActive}
                 />
-              ))}
+              )) : <Navigate to="/auth" replace />}
             />
             <Route
               path="/customer/tracking"
-              element={guard('customer', <CustomerTrackingPage locale={locale} prescriptions={prescriptions} />)}
+              element={session ? guard('customer', <CustomerTrackingPage locale={locale} prescriptions={prescriptions} />) : <Navigate to="/auth" replace />}
             />
 
             <Route
