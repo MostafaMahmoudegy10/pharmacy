@@ -72,6 +72,8 @@ export type Prescription = {
   phone: string;
   area: string;
   areaEn: string;
+  address?: string;
+  locationUrl?: string;
   status: PrescriptionStatus;
   uploadedAt: string;
   uploadedAtEn: string;
@@ -83,6 +85,9 @@ export type Prescription = {
   responseEn?: string;
   recommendation?: string;
   recommendationEn?: string;
+  quoteTotal?: number;
+  orderId?: string;
+  needsClearImage?: boolean;
   messages: PrescriptionMessage[];
 };
 
@@ -103,6 +108,8 @@ export type DeliveryOrder = {
   routeEn: string;
   collected: number;
   customerPaid: number;
+  locationUrl?: string;
+  prescriptionId?: string;
 };
 
 export type Metric = {

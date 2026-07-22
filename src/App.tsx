@@ -162,6 +162,8 @@ function AppShell() {
     customer: string;
     phone: string;
     area: string;
+    address: string;
+    locationUrl: string;
     notes: string;
     fileName: string;
   }) => {
@@ -176,6 +178,8 @@ function AppShell() {
       phone: payload.phone || '0100 000 2026',
       area: payload.area || 'القاهرة',
       areaEn: payload.area || 'Cairo',
+      address: payload.address || 'العنوان يحدده العميل',
+      locationUrl: payload.locationUrl,
       status: 'new',
       uploadedAt: 'الآن',
       uploadedAtEn: 'Now',
@@ -215,6 +219,7 @@ function AppShell() {
     response: string,
     recommendation: string,
     availability: Record<string, boolean>,
+    quoteTotal: number,
   ) => {
     setPrescriptions((current) =>
       current.map((prescription) =>
@@ -226,6 +231,7 @@ function AppShell() {
               responseEn: locale === 'en' ? response : prescription.responseEn || response,
               recommendation: locale === 'ar' ? recommendation : prescription.recommendation || recommendation,
               recommendationEn: locale === 'en' ? recommendation : prescription.recommendationEn || recommendation,
+              quoteTotal,
               items: prescription.items.map((item) => ({
                 ...item,
                 available: availability[item.name] ?? item.available,
@@ -250,6 +256,61 @@ function AppShell() {
       ar: `تم إرسال رد الصيدلي على ${prescriptionId}`,
       en: `Pharmacist reply sent for ${prescriptionId}`,
     });
+  };
+
+  const approvePrescriptionQuote = (prescriptionId: string) => {
+    const prescription = prescriptions.find((item) => item.id === prescriptionId);
+    if (!prescription || !prescription.quoteTotal || prescription.orderId) return;
+    const nextId = `ORD-${1191 + orders.length}`;
+    const order: DeliveryOrder = {
+      id: nextId,
+      prescriptionId,
+      customer: prescription.customer,
+      phone: prescription.phone,
+      area: prescription.area,
+      areaEn: prescription.areaEn,
+      address: prescription.address || prescription.area,
+      addressEn: prescription.address || prescription.areaEn,
+      locationUrl: prescription.locationUrl,
+      items: prescription.items.filter((item) => item.available).map((item) => `${item.name} x${item.qty}`),
+      itemsEn: prescription.items.filter((item) => item.available).map((item) => `${item.nameEn} x${item.qty}`),
+      total: prescription.quoteTotal,
+      status: 'queued',
+      courier: 'بانتظار قبول مندوب',
+      route: 'جاهز للاستلام من الصيدلية',
+      routeEn: 'Ready for pharmacy pickup',
+      collected: 0,
+      customerPaid: 0,
+    };
+    setOrders((current) => [order, ...current]);
+    setPrescriptions((current) => current.map((item) => item.id === prescriptionId ? { ...item, status: 'ready', orderId: nextId } : item));
+    setNotice({ ar: `تم تأكيد العرض وإنشاء الطلب ${nextId}`, en: `Quote approved and order ${nextId} created` });
+  };
+
+  const requestClearPrescriptionImage = (prescriptionId: string) => {
+    setPrescriptions((current) => current.map((item) => item.id === prescriptionId ? {
+      ...item,
+      status: 'reviewed',
+      needsClearImage: true,
+      response: 'الصورة غير واضحة بما يكفي لقراءة اسم الدواء والجرعة. برجاء إرسال صورة أوضح.',
+      responseEn: 'The image is not clear enough to read the medicine and dose. Please upload a clearer photo.',
+      messages: [...item.messages, { from: 'pharmacist', text: 'من فضلك ابعت صورة أوضح للروشتة عشان نراجعها بأمان.', textEn: 'Please send a clearer prescription image so we can review it safely.', time: 'الآن', timeEn: 'Now' }],
+    } : item));
+  };
+
+  const resubmitPrescriptionImage = (prescriptionId: string, fileName: string) => {
+    setPrescriptions((current) => current.map((item) => item.id === prescriptionId ? {
+      ...item,
+      status: 'new',
+      needsClearImage: false,
+      fileName,
+      uploadedAt: 'الآن — صورة جديدة',
+      uploadedAtEn: 'Now — new image',
+      response: undefined,
+      responseEn: undefined,
+      messages: [...item.messages, { from: 'customer', text: `تم إرسال صورة أوضح: ${fileName}`, textEn: `A clearer image was uploaded: ${fileName}`, time: 'الآن', timeEn: 'Now' }],
+    } : item));
+    setNotice({ ar: `تم إعادة إرسال الروشتة ${prescriptionId}`, en: `Prescription ${prescriptionId} resubmitted` });
   };
 
   const addMedicine = (medicine: Omit<Medicine, 'id' | 'popularity'>) => {
@@ -346,6 +407,8 @@ function AppShell() {
                   locale={locale}
                   uploadPrescription={uploadPrescription}
                   prescriptions={prescriptions}
+                  approvePrescriptionQuote={approvePrescriptionQuote}
+                  resubmitPrescriptionImage={resubmitPrescriptionImage}
                 />
               ))}
             />
@@ -366,7 +429,7 @@ function AppShell() {
             />
             <Route
               path="/customer/tracking"
-              element={session ? guard('customer', <CustomerTrackingPage locale={locale} prescriptions={prescriptions} />) : <Navigate to="/auth" replace />}
+              element={session ? guard('customer', <CustomerTrackingPage locale={locale} prescriptions={prescriptions} approvePrescriptionQuote={approvePrescriptionQuote} resubmitPrescriptionImage={resubmitPrescriptionImage} />) : <Navigate to="/auth" replace />}
             />
 
             <Route
@@ -380,6 +443,7 @@ function AppShell() {
                   selectedPrescriptionId={selectedPrescriptionId}
                   setSelectedPrescriptionId={setSelectedPrescriptionId}
                   sendPharmacistReply={sendPharmacistReply}
+                  requestClearPrescriptionImage={requestClearPrescriptionImage}
                   addMedicine={addMedicine}
                 />
               ))}
@@ -398,6 +462,7 @@ function AppShell() {
                     selectedPrescriptionId={selectedPrescriptionId}
                     setSelectedPrescriptionId={setSelectedPrescriptionId}
                     sendPharmacistReply={sendPharmacistReply}
+                    requestClearPrescriptionImage={requestClearPrescriptionImage}
                     addMedicine={addMedicine}
                   />
                 ))}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCheck, MessageCircle, Paperclip, Send, UserRound } from 'lucide-react';
+import { CheckCheck, CircleCheck, ImageUp, MessageCircle, Paperclip, Send, ShoppingBag, UserRound } from 'lucide-react';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import type { Locale, Prescription } from '../../../types/pharmacy';
 import { prescriptionNotes, prescriptionResponse, prescriptionStatusLabel } from '../../../utils/pharmacy';
@@ -10,7 +10,7 @@ const copy = {
   en: { eyebrow:'Tracking & chat', title:'Stay connected to your pharmacist', description:'Choose a prescription, see its status and ask questions in one conversation.', empty:'Message your pharmacist...', pharmacist:'RxFlow Pharmacist', online:'Online now', sent:'Sent', select:'Recent prescriptions', newMessage:'Your pharmacist will reply here after reviewing the prescription.' },
 };
 
-export function PrescriptionTimeline({ locale, prescriptions }: { locale: Locale; prescriptions: Prescription[] }) {
+export function PrescriptionTimeline({ locale, prescriptions, approvePrescriptionQuote, resubmitPrescriptionImage }: { locale: Locale; prescriptions: Prescription[]; approvePrescriptionQuote: (id: string) => void; resubmitPrescriptionImage: (id: string, fileName: string) => void }) {
   const t=copy[locale];
   const [selectedId,setSelectedId]=useState(prescriptions[0]?.id || '');
   const [draft,setDraft]=useState('');
@@ -27,6 +27,8 @@ export function PrescriptionTimeline({ locale, prescriptions }: { locale: Locale
       <div className="chat-window">
         <header><div className="relative"><div className="pharmacist-avatar"><UserRound/></div><i/></div><div className="flex-1"><h3>{t.pharmacist}</h3><p>{t.online}</p></div><StatusBadge>{prescriptionStatusLabel(selected.status,locale)}</StatusBadge></header>
         <div className="chat-context"><b>{selected.id}</b><span>{prescriptionNotes(selected,locale)}</span></div>
+        {selected.needsClearImage&&<div className="resubmit-card"><div><ImageUp/><span><b>{locale==='ar'?'الصيدلي محتاج صورة أوضح':'A clearer image is required'}</b><small>{locale==='ar'?'صوّر الروشتة كاملة في إضاءة كويسة ومن غير اهتزاز.':'Capture the full page in good light without blur.'}</small></span></div><label>{locale==='ar'?'إعادة إرسال صورة أوضح':'Upload clearer image'}<input type="file" accept="image/*,.pdf" className="hidden" onChange={(event)=>{const name=event.target.files?.[0]?.name;if(name)resubmitPrescriptionImage(selected.id,name);}}/></label></div>}
+        {selected.quoteTotal && <div className={`quote-card ${selected.orderId ? 'approved' : ''}`}><div className="quote-icon">{selected.orderId ? <CircleCheck/> : <ShoppingBag/>}</div><div className="flex-1"><small>{locale==='ar'?'عرض الصيدلي النهائي':'Final pharmacist quote'}</small><b>{selected.quoteTotal.toLocaleString(locale==='ar'?'ar-EG':'en-US')} {locale==='ar'?'جنيه':'EGP'}</b>{selected.orderId&&<em>{locale==='ar'?`تم التأكيد — الطلب ${selected.orderId}`:`Approved — order ${selected.orderId}`}</em>}</div>{!selected.orderId&&<button type="button" onClick={()=>approvePrescriptionQuote(selected.id)}>{locale==='ar'?'موافق، أنشئ الطلب':'Approve & create order'}</button>}</div>}
         <div className="messages-area">
           <div className="day-label">{locale==='ar'?'اليوم':'Today'}</div>
           {messages.map((message,index)=><motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} key={index} className={`message ${message.from==='customer'?'mine':'theirs'}`}><p>{message.text}</p><small>{message.time}{message.from==='customer'&&<CheckCheck size={13}/>}</small></motion.div>)}

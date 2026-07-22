@@ -89,10 +89,14 @@ export function CustomerPrescriptionPage({
   locale,
   uploadPrescription,
   prescriptions,
+  approvePrescriptionQuote,
+  resubmitPrescriptionImage,
 }: {
   locale: Locale;
-  uploadPrescription: (payload: { customer: string; phone: string; area: string; notes: string; fileName: string }) => void;
+  uploadPrescription: (payload: { customer: string; phone: string; area: string; address: string; locationUrl: string; notes: string; fileName: string }) => void;
   prescriptions: Prescription[];
+  approvePrescriptionQuote: (id: string) => void;
+  resubmitPrescriptionImage: (id: string, fileName: string) => void;
 }) {
   return (
     <div className="prescription-page pb-16">
@@ -116,7 +120,7 @@ export function CustomerPrescriptionPage({
       </section>
       <div className="mx-auto max-w-7xl px-4 pt-10 lg:px-8">
         <PrescriptionUploadPanel locale={locale} uploadPrescription={uploadPrescription} />
-        <PrescriptionTimeline locale={locale} prescriptions={prescriptions} />
+        <PrescriptionTimeline locale={locale} prescriptions={prescriptions} approvePrescriptionQuote={approvePrescriptionQuote} resubmitPrescriptionImage={resubmitPrescriptionImage} />
       </div>
     </div>
   );
@@ -181,13 +185,17 @@ export function CustomerRefillsPage({
 export function CustomerTrackingPage({
   locale,
   prescriptions,
+  approvePrescriptionQuote,
+  resubmitPrescriptionImage,
 }: {
   locale: Locale;
   prescriptions: Prescription[];
+  approvePrescriptionQuote: (id: string) => void;
+  resubmitPrescriptionImage: (id: string, fileName: string) => void;
 }) {
   return (
     <div className="pt-8">
-      <PrescriptionTimeline locale={locale} prescriptions={prescriptions} />
+      <PrescriptionTimeline locale={locale} prescriptions={prescriptions} approvePrescriptionQuote={approvePrescriptionQuote} resubmitPrescriptionImage={resubmitPrescriptionImage} />
     </div>
   );
 }

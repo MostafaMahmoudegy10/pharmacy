@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Banknote, Check, CheckCircle2, Clock3, MapPin, PackageCheck, Search, Truck, Wallet } from 'lucide-react';
+import { Banknote, Check, CheckCircle2, Clock3, ExternalLink, MapPin, PackageCheck, Search, Truck, Wallet } from 'lucide-react';
 import { MetricCard } from '../../../components/ui/MetricCard';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { WorkspaceHero } from '../../../components/ui/WorkspaceHero';
@@ -36,6 +36,10 @@ const copy = {
     all: 'الكل',
     queued: 'تحضير',
     routeStages: ['استلام', 'في الطريق', 'تسليم'],
+    waiting: 'طلبات جديدة مستنياك في الصيدلية',
+    waitingD: 'اقبل المهمة، استلم الطلب من الصيدلية وبعدها توجّه للعميل.',
+    accept: 'قبول واستلام المهمة',
+    location: 'فتح لوكيشن العميل',
   },
   en: {
     title: 'A clear courier flow for delivery and collection',
@@ -59,6 +63,10 @@ const copy = {
     all: 'All',
     queued: 'Preparing',
     routeStages: ['Pickup', 'On the way', 'Delivered'],
+    waiting: 'New pharmacy pickups are waiting',
+    waitingD: 'Accept a task, collect it from the pharmacy, then head to the customer.',
+    accept: 'Accept pickup task',
+    location: 'Open customer location',
   },
 };
 
@@ -108,6 +116,8 @@ export function DeliveryWorkspace({
         <MetricCard icon={Wallet} label={text.pharmacyCash} value={formatCurrency(collected, locale)} detail={`${text.expected} ${formatCurrency(expected, locale)}`} />
         <MetricCard icon={Banknote} label={text.change} value={formatCurrency(changeDue, locale)} detail={text.changeDetail} />
       </div>}
+
+      {showOverview && orders.some((order)=>order.status==='queued') && <div className="delivery-alert"><div className="delivery-alert-icon"><PackageCheck/></div><div className="flex-1"><b>{text.waiting}</b><p>{text.waitingD}</p></div><span>{orders.filter((order)=>order.status==='queued').length}</span></div>}
 
       {showRoutes && <section className="rounded-lg border border-[#d7e8e2] bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -165,7 +175,7 @@ export function DeliveryWorkspace({
             <div className="mt-4 grid gap-3 text-sm font-bold text-[#42635b]">
               <div className="flex items-start gap-2">
                 <MapPin className="mt-1 shrink-0 text-[#0f7f6d]" size={17} />
-                <span>{orderAddress(order, locale)}</span>
+                <div><span className="block">{orderAddress(order, locale)}</span>{order.locationUrl&&<a href={order.locationUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-black text-[#0f7f6d]">{text.location}<ExternalLink size={13}/></a>}</div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock3 className="text-[#0f7f6d]" size={17} />
@@ -232,14 +242,15 @@ export function DeliveryWorkspace({
               <button
                 type="button"
                 onClick={() => updateOrder(order.id, {
-                  status: 'out',
+                  status: order.status === 'queued' ? 'assigned' : 'out',
+                  courier: order.status === 'queued' ? (locale === 'ar' ? 'محمد المندوب' : 'Mohamed Courier') : order.courier,
                   route: order.status === 'delivered' ? copy.ar.minutes : order.route,
                   routeEn: order.status === 'delivered' ? copy.en.minutes : order.routeEn,
                 })}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-[#0f7f6d] px-3 py-3 text-sm font-black text-[#0f7f6d] transition hover:bg-[#edf7f3]"
               >
                 <Truck size={18} />
-                {text.out}
+                {order.status === 'queued' ? text.accept : text.out}
               </button>
               <button
                 type="button"

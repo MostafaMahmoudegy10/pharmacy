@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { BellRing, Boxes, ClipboardList, FileImage, MessageCircle, Plus, Search } from 'lucide-react';
+import { BellRing, Boxes, ClipboardList, FileImage, ImageUp, MessageCircle, Plus, ReceiptText, Search } from 'lucide-react';
 import { categories } from '../../../data/pharmacyData';
 import { InputField } from '../../../components/ui/InputField';
 import { MetricCard } from '../../../components/ui/MetricCard';
@@ -40,6 +40,9 @@ const copy = {
     reply: 'رد الصيدلي للعميل',
     recommendation: 'الترشيحات والبدائل',
     send: 'إرسال الرد للعميل',
+    clearer: 'طلب إعادة إرسال صورة أوضح',
+    quote: 'السعر النهائي للطلب',
+    quoteHint: 'العميل هيشوف السعر ويوافق عليه قبل إنشاء الطلب',
     defaultReply: 'تمت مراجعة الروشتة. المتاح هيتجهز، والناقص له بدائل مناسبة بعد موافقة العميل.',
     defaultRecommendation: 'البدائل المقترحة لا تستخدم إلا بعد تأكيد الصيدلي وموافقة العميل.',
     noAlternativeFallback: 'الصيدلي هيقترح بديل مناسب',
@@ -73,6 +76,9 @@ const copy = {
     reply: 'Pharmacist reply',
     recommendation: 'Recommendations and alternatives',
     send: 'Send customer reply',
+    clearer: 'Request a clearer image',
+    quote: 'Final order total',
+    quoteHint: 'The customer approves this amount before an order is created',
     defaultReply: 'Prescription reviewed. Available items will be prepared, and missing items have suggested alternatives after approval.',
     defaultRecommendation: 'Suggested alternatives should only be used after pharmacist confirmation and customer approval.',
     noAlternativeFallback: 'The pharmacist will suggest a suitable alternative',
@@ -99,6 +105,7 @@ export function PharmacistWorkspace({
   selectedPrescriptionId,
   setSelectedPrescriptionId,
   sendPharmacistReply,
+  requestClearPrescriptionImage,
   addMedicine,
   page = 'overview',
 }: {
@@ -108,7 +115,8 @@ export function PharmacistWorkspace({
   activePrescription: Prescription;
   selectedPrescriptionId: string;
   setSelectedPrescriptionId: (id: string) => void;
-  sendPharmacistReply: (id: string, response: string, recommendation: string, availability: Record<string, boolean>) => void;
+  sendPharmacistReply: (id: string, response: string, recommendation: string, availability: Record<string, boolean>, quoteTotal: number) => void;
+  requestClearPrescriptionImage: (id: string) => void;
   addMedicine: (medicine: Omit<Medicine, 'id' | 'popularity'>) => void;
   page?: 'overview' | 'queue' | 'review' | 'inventory';
 }) {
@@ -117,6 +125,7 @@ export function PharmacistWorkspace({
   const [response, setResponse] = useState('');
   const [recommendation, setRecommendation] = useState('');
   const [availability, setAvailability] = useState<Record<string, boolean>>({});
+  const [quoteTotal, setQuoteTotal] = useState('');
   const [rxQuery, setRxQuery] = useState('');
   const [newMedicine, setNewMedicine] = useState({
     arName: '',
@@ -136,6 +145,7 @@ export function PharmacistWorkspace({
     setAvailability(
       Object.fromEntries(activePrescription.items.map((item) => [item.name, item.available])),
     );
+    setQuoteTotal(activePrescription.quoteTotal ? String(activePrescription.quoteTotal) : '250');
   }, [activePrescription, locale, text.defaultRecommendation, text.defaultReply]);
 
   const inventoryValue = medicines.reduce((sum, medicine) => sum + medicine.price * medicine.stock, 0);
@@ -309,14 +319,16 @@ export function PharmacistWorkspace({
               </label>
             </div>
 
-            <button
+            <div className="quote-editor mt-5"><div className="quote-editor-icon"><ReceiptText/></div><div className="flex-1"><label>{text.quote}</label><p>{text.quoteHint}</p></div><div className="quote-input"><input type="number" min="0" value={quoteTotal} onChange={(event)=>setQuoteTotal(event.target.value)}/><span>{locale==='ar'?'جنيه':'EGP'}</span></div></div>
+
+            <div className="mt-5 flex flex-wrap gap-3"><button
               type="button"
-              onClick={() => sendPharmacistReply(activePrescription.id, response, recommendation, availability)}
-              className="mt-5 inline-flex items-center gap-2 rounded-md bg-[#0f7f6d] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0a5f52]"
+              onClick={() => sendPharmacistReply(activePrescription.id, response, recommendation, availability, Number(quoteTotal) || 0)}
+              className="inline-flex items-center gap-2 rounded-md bg-[#0f7f6d] px-5 py-3 text-sm font-black text-white transition hover:bg-[#0a5f52]"
             >
               <MessageCircle size={18} />
               {text.send}
-            </button>
+            </button><button type="button" onClick={()=>requestClearPrescriptionImage(activePrescription.id)} className="inline-flex items-center gap-2 rounded-md border border-[#d59c3e] bg-[#fff8e9] px-5 py-3 text-sm font-black text-[#966319] transition hover:bg-[#ffefcb]"><ImageUp size={18}/>{text.clearer}</button></div>
           </article>
           )}
 

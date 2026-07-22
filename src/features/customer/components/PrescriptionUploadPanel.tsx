@@ -9,6 +9,8 @@ type PrescriptionPayload = {
   customer: string;
   phone: string;
   area: string;
+  address: string;
+  locationUrl: string;
   notes: string;
   fileName: string;
 };
@@ -61,6 +63,8 @@ export function PrescriptionUploadPanel({
     customer: '',
     phone: '',
     area: '',
+    address: '',
+    locationUrl: '',
     notes: '',
     fileName: '',
   });
@@ -105,6 +109,10 @@ export function PrescriptionUploadPanel({
                 placeholder={text.placeholders.area}
                 onChange={(value) => setForm({ ...form, area: value })}
               />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <InputField label={locale === 'ar' ? 'العنوان بالتفصيل' : 'Full address'} value={form.address} placeholder={locale === 'ar' ? 'رقم العمارة، الشارع، علامة مميزة' : 'Building, street, landmark'} onChange={(value) => setForm({ ...form, address: value })} />
+              <InputField label={locale === 'ar' ? 'رابط اللوكيشن من Google Maps' : 'Google Maps location link'} value={form.locationUrl} placeholder="https://maps.google.com/..." onChange={(value) => setForm({ ...form, locationUrl: value })} />
             </div>
             <label className="grid gap-2">
               <span className="text-xs font-black text-[#49645d]">{text.notes}</span>
